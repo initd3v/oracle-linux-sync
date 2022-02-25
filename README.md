@@ -21,7 +21,7 @@ To run this project, you need to clone it to your local computer and run it as a
 ```
 $ cd /tmp
 $ git clone https://github.com/initd3v/oracle-linux-sync.git
-$ nano -w /tmp/oracle-linux-sync/oracle-sync.sh
+$ nano -w /tmp/oracle-linux-sync/oracle-linux-sync.sh
 ```
 
 The folowing configuration options are valid.
@@ -30,6 +30,6 @@ The folowing configuration options are valid.
 To run this project, you must add the execution flag for the user context to the bash file. Afterwards execute it in a bash shell. 
 
 ```
-$ chmod u+x /tmp/oracle-linux-sync/oracle-sync.sh
-$ /tmp/oracle-linux-sync/oracle-sync.sh
+$ chmod u+x /tmp/oracle-linux-sync/oracle-linux-sync.sh
+$ /tmp/oracle-linux-sync/oracle-linux-sync.sh
 ```
