@@ -34,7 +34,7 @@ processOutput(){
 		*)
 			if [ ${VERBOSITY_LEVEL} -ne 0 ] ; then
 				TMP_TIME=`/bin/date +"%d%m%Y_%H%M%S"`
-				${CMD_ECHO} -e "${TMP_TIMfor E}ERROR: No valid event can be prosecessed. Possibly script error exists for subroutine call precessOutput().\n" >> "${LOG_PATH}/cgroupmount.log"
+				${CMD_ECHO} -e "${TMP_TIME}ERROR: No valid event can be prosecessed. Possibly script error exists for subroutine call precessOutput().\n" >> "${LOG_PATH}/cgroupmount.log"
 			fi
 			;;
 	esac
