@@ -45,5 +45,5 @@ The folowing configuration options are valid:
 | -c \| --configuration| set path to configuration file (parameters will be overwritten)     | optional  | STRING              | -       |
 | -d \| --directory    | set path to repository folder where RPM packages and meta information should be saved | mandatory | STRING | -  |
 | -u \| --url          | pass URL to Oracle Linux index page (for multiple URL, pass the argument multiple times; the character = will be escaped to %3D) | mandatory | STRING | - |
-| -m \| --metadata     | set path to createrepo_c binary - if passed, the meta information will be geenrated | optional | STRING | -     |
+| -m \| --metadata     | set path to createrepo_c binary - if passed, the meta information will be generated | optional | STRING | -     |
 
