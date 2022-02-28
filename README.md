@@ -9,7 +9,7 @@
 ## Description
 This bash script syncs the *.rpm packages of one or more OracleLinux repositories based on the index URI. Optionally it provides the possibility to create the YUM meta information based on the createrepo_c program. It can be run in a non-root user context.
 
-The Project is written in GNU bash, Version 5.
+The Project is written as a GNU bash shell script.
 
 ## Dependencies
 * mandatory : GNU bash          >= 5
