@@ -28,6 +28,8 @@ $ nano -w /tmp/oracle-linux-sync/oracle-linux-sync.sh
 ### Running the script
 
 To run this project, you must add the execution flag for the user context to the bash file. Afterwards execute it in a bash shell. 
+After every successful execution the current option configuration will be saved in the download directory.
+The log file is located in the download directory.
 
 ```
 $ chmod u+x /tmp/oracle-linux-sync/oracle-linux-sync.sh
@@ -36,7 +38,15 @@ $ /tmp/oracle-linux-sync/oracle-linux-sync.sh
 
 ### Supported Options
 
-The folowing configuration options are valid:
+#### Overview
+
+* oracle-linux-sync.sh -d=[download path] -u=[download url] [-m=[createrepo_c binary path] -v=[verbosity]]
+* oracle-linux-sync.sh -c=[configuration file path]
+* oracle-linux-sync.sh -h
+
+#### Option Description
+
+The folowing configuration options are valid. Every parameter is followed by an "=":
 
 | Option syntax        | Description                                                         | Necessity | Supported value(s)  | Default |
 |:---------------------|:--------------------------------------------------------------------|:---------:|:-------------------:|:-------:|
@@ -46,4 +56,3 @@ The folowing configuration options are valid:
 | -d \| --directory    | set path to repository folder where RPM packages and meta information should be saved | mandatory | STRING | -  |
 | -u \| --url          | pass URL to Oracle Linux index page (for multiple URL, pass the argument multiple times; the character = will be escaped to %3D) | mandatory | STRING | - |
 | -m \| --metadata     | set path to createrepo_c binary - if passed, the meta information will be generated | optional | STRING | -     |
-
