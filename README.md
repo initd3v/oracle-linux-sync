@@ -23,13 +23,21 @@ $ cd /tmp
 $ git clone https://github.com/initd3v/oracle-linux-sync.git
 $ nano -w /tmp/oracle-linux-sync/oracle-linux-sync.sh
 ```
-
-The folowing configuration options are valid.
-
 ## Usage
+
+### Running the script
+
 To run this project, you must add the execution flag for the user context to the bash file. Afterwards execute it in a bash shell. 
 
 ```
 $ chmod u+x /tmp/oracle-linux-sync/oracle-linux-sync.sh
 $ /tmp/oracle-linux-sync/oracle-linux-sync.sh
 ```
+
+### Supported Options
+
+The folowing configuration options are valid:
+
+| Option syntax   | Description      | Necessity | Supported value(s) | Default |
+|:----------------|:-----------------|:---------:|:------------------:|:-------:|
+| -h \| --help     | display help page|optional   | -                  | -       |
