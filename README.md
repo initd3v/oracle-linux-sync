@@ -33,7 +33,7 @@ The log file is located in the download directory.
 
 ```
 $ chmod u+x /tmp/oracle-linux-sync/oracle-linux-sync.sh
-$ /tmp/oracle-linux-sync/oracle-linux-sync.sh
+$ /tmp/oracle-linux-sync/oracle-linux-sync.sh -d=[download path] -u=[download url]
 ```
 
 ### Supported Options
@@ -46,12 +46,12 @@ $ /tmp/oracle-linux-sync/oracle-linux-sync.sh
 
 #### Option Description
 
-The folowing configuration options are valid. Every parameter is followed by an "=":
+The folowing configuration options are valid. Every parameter is followed by a "=":
 
 | Option syntax        | Description                                                         | Necessity | Supported value(s)  | Default |
 |:---------------------|:--------------------------------------------------------------------|:---------:|:-------------------:|:-------:|
 | -h \| --help         | display help page                                                   | optional  | -                   | -       |
-| -v \| --verbosity    | adjust level of verbosity (0 = no logging \| 1 = systemctl and log file logging \| 2 = systemctl, log file logging and terminal output | optional  | INT from 0 and 2 | 2      |
+| -v \| --verbosity    | adjust level of verbosity (0 = no logging \| 1 = systemctl and log file logging \| 2 = systemctl, log file logging and terminal output | optional  | INT from 0 to 2 | 2      |
 | -c \| --configuration| set path to configuration file (parameters will be overwritten)     | optional  | STRING              | -       |
 | -d \| --directory    | set path to repository folder where RPM packages and meta information should be saved | mandatory | STRING | -  |
 | -u \| --url          | pass URL to Oracle Linux index page (for multiple URL, pass the argument multiple times; the character = will be escaped to %3D) | mandatory | STRING | - |
