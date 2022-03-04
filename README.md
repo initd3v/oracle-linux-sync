@@ -21,7 +21,6 @@ To run this project, you need to clone it to your local computer and run it as a
 ```
 $ cd /tmp
 $ git clone https://github.com/initd3v/oracle-linux-sync.git
-$ nano -w /tmp/oracle-linux-sync/oracle-linux-sync.sh
 ```
 ## Usage
 
@@ -32,8 +31,8 @@ After every successful execution the current option configuration will be saved 
 The log file is located in the download directory.
 
 ```
-$ chmod u+x /tmp/oracle-linux-sync/oracle-linux-sync.sh
-$ /tmp/oracle-linux-sync/oracle-linux-sync.sh -d=[download path] -u=[download url]
+$ chmod u+x /tmp/oracle-linux-sync/src/oracle-linux-sync.sh
+$ /tmp/oracle-linux-sync/src/oracle-linux-sync.sh -d=[download path] -u=[download url]
 ```
 
 ### Supported Options
