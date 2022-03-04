@@ -19,7 +19,7 @@ processOutput(){
 			;;
 		"message")
 			if [ ${VERBOSITY_LEVEL} -ne 0 ]; then
-				TMP_TIME=`/bin/date +"%d%m%Y_%H%M%S"`
+				TMP_TIME=`${CMD_DATE} +"%d%m%Y_%H%M%S"`
 				if [ -d "${REPO_DOWNLOAD_PATH}" ] ; then
 					${CMD_ECHO} -e "${TMP_TIME}$2" >> "${REPO_DOWNLOAD_PATH}/oraclesync.log"
 				fi
@@ -33,7 +33,7 @@ processOutput(){
 			;;
 		*)
 			if [ ${VERBOSITY_LEVEL} -ne 0 ] ; then
-				TMP_TIME=`/bin/date +"%d%m%Y_%H%M%S"`
+				TMP_TIME=`${CMD_DATE} +"%d%m%Y_%H%M%S"`
 				${CMD_ECHO} -e "${TMP_TIME}ERROR: No valid event can be prosecessed. Possibly script error exists for subroutine call precessOutput().\n" >> "${LOG_PATH}/cgroupmount.log"
 			fi
 			;;
@@ -145,7 +145,7 @@ processParameters() {
 			if [ ${TMP_VALUE} -eq 0 ] || [ ${TMP_VALUE} -lt 3 ] ; then
 				VERBOSITY_LEVEL="${TMP_VALUE}"
 			else
-				ERROR="${ERROR}ERROR: The verbosity level must be a number betwenn 0 and 2 but is '${TMP_VALUE}'."
+				ERROR="${ERROR}ERROR: The verbosity level must be a number between 0 and 2 but is '${TMP_VALUE}'."
 			fi
 			;;
 		"--configuration" | "configuration" | "-c" | "c")
@@ -290,4 +290,3 @@ PARAMETERS_COUNT=$(( $# + 1 ))
 processInitialization
 processSync
 processConfigurationSave
-
