@@ -183,7 +183,7 @@ processParameters() {
 			${CMD_ECHO} -e "\t-u, --url\t: pass URL to Oracle Linux index page (for multiple URL, pass the argument multiple times; the character = will be escaped to %3D)"
 			${CMD_ECHO}
 			${CMD_ECHO} -e "Optional arguments\n"
-			${CMD_ECHO} -e "\t-v, --verbosity\t: adjust level of verbosity (0 = no logging | 1 = systemctl and log file logging | 2 = systemctl, log file logging and terminal output"
+			${CMD_ECHO} -e "\t-v, --verbosity\t: adjust level of verbosity (0 = no logging | 1 = systemctl and log file logging | 2 = systemctl, log file logging and terminal output)"
 			${CMD_ECHO} -e "\t-m, --metadata\t: set path to createrepo_c binary - if passed, the meta information will be generated"
 			${CMD_ECHO} -e "\t-h, --help\t: display help page"
 			${CMD_ECHO}
