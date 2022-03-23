@@ -240,14 +240,13 @@ processSync() {
                 if [ "${TMP_FILE_SHA256SUM}" == "${TMP_FILE_SHA256SUM_COMPARE}" ] ; then
                     processOutput "message" "WARNING: The file ${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}${TMP_FILE_NAME}.uri.sha256 has the same checksum as the URI source file. File download for ${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}${TMP_FILE_NAME} will be skipped."
                     continue
-				else
-					${CMD_ECHO} "${TMP_FILE_SHA256SUM}" > "${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}${TMP_FILE_NAME}.uri.sha256"
 				fi
 
 				cd "${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}"
 				${CMD_CURL} -s -O "${REPO_DOWNLOAD_BASE_URI}${TMP_RETURN_RPM}"
 				if [ $? -eq 0 ] ;  then
 					processOutput "message" "INFO: The URI file '${REPO_DOWNLOAD_BASE_URI}${TMP_RETURN_RPM}' was downloaded to '${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}'."
+					${CMD_ECHO} "${TMP_FILE_SHA256SUM}" > "${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}${TMP_FILE_NAME}.uri.sha256"
 					${CMD_SLEEP} 0.01
 				else
 					processOutput "message" "WARNING: The URI file '${REPO_DOWNLOAD_BASE_URI}${TMP_RETURN_RPM}' could not be downloaded."
