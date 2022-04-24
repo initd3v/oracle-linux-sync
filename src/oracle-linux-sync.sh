@@ -1,5 +1,18 @@
 #!/bin/bash
 
+processAbort() {
+    /usr/bin/false
+	TMP_FALSE=$?
+    TMP_CHILD_PIDS=`/usr/bin/pstree -p $$ | /usr/bin/grep -oP '\(\K[^\)]+'`
+	if [ "${TMP_CHILD_PIDS}x" != "x" ] ; then
+		for TMP_CHILD_PIDS_KILL in ${TMP_CHILD_PIDS} ; do
+			/usr/bin/kill -9 ${TMP_CHILD_PIDS_KILL} > /dev/null 2>&1
+		done
+	fi
+	/usr/bin/rmdir /tmp/.oracle-linux-sync.lck > /dev/null 2>&1
+	exit ${TMP_FALSE} 
+}
+
 processOutput(){
 	case $1 in
 		"error")
@@ -40,7 +53,7 @@ processOutput(){
 	esac
 }
 
-processInitialization(){
+processInitialization() {
 	# set version information
 	VERSION="1.0"
 
@@ -67,8 +80,12 @@ processInitialization(){
 	CMD_CAT=`${CMD_WHEREIS} cat | ${CMD_AWK} '{ print $2 }'`
 	CMD_SLEEP=`${CMD_WHEREIS} sleep | ${CMD_AWK} '{ print $2 }'`
 	CMD_MV=`${CMD_WHEREIS} mv | ${CMD_AWK} '{ print $2 }'`
+	CMD_KILL=`${CMD_WHEREIS} kill | ${CMD_AWK} '{ print $2 }'`
+	CMD_RMDIR=`${CMD_WHEREIS} rmdir | ${CMD_AWK} '{ print $2 }'`
+	CMD_PSTREE=`${CMD_WHEREIS} pstree | ${CMD_AWK} '{ print $2 }'`
+	CMD_WC=`${CMD_WHEREIS} wc | ${CMD_AWK} '{ print $2 }'`
 
-	for TMP in "${CMD_ECHO}" "${CMD_AWK}" "${CMD_WHEREIS}" "${CMD_DATE}" "${CMD_GREP}" "${CMD_CURL}" "${CMD_SED}" "${CMD_MKDIR}" "${CMD_SHA256SUM}" "${CMD_CAT}" "${CMD_SLEEP}" ; do
+	for TMP in "${CMD_ECHO}" "${CMD_AWK}" "${CMD_WHEREIS}" "${CMD_DATE}" "${CMD_GREP}" "${CMD_CURL}" "${CMD_SED}" "${CMD_MKDIR}" "${CMD_SHA256SUM}" "${CMD_CAT}" "${CMD_SLEEP}" "${CMD_KILL}" "${CMD_RMDIR}" "${CMD_PSTREE}" "${CMD_WC}" ; do
 		if [ "${TMP}x" == "x" ] || [ ! -f "${TMP}" ] ; then
 			TMP_NAME=(${!TMP@})
 			ERROR="${ERROR}ERROR: The bash variable '${TMP_NAME}' with value '${TMP}' does not reference to a valid command binary path or is empty.\n"
@@ -92,6 +109,13 @@ processInitialization(){
 
 	if [ ${VERBOSITY_LEVEL} -ne 0 ] && [ ! -f "${REPO_DOWNLOAD_PATH}/oraclesync.log" ] ; then
 		/bin/echo "" > "${REPO_DOWNLOAD_PATH}/oraclesync.log"
+	fi
+
+	${CMD_MKDIR} /tmp/.oracle-linux-sync.lck  > /dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		processOutput "message" "INFO: The lock folder '/tmp/.oracle-linux-sync.lck' was successfully created to prevent multiple script execution."
+	else
+		ERROR="${ERROR}ERROR: There is already a instance of the script running due to the lock folder '/tmp/.oracle-linux-sync.lck'."
 	fi
 
 	if [ "${ERROR}x" != "x" ] ; then
@@ -120,6 +144,10 @@ processInitialization(){
 		TMP_NAME=(${!CMD_CREATEREPO@})
 		ERROR="${ERROR}ERROR: The bash variable '${TMP_NAME}' with value '${CMD_CREATEREPO}' does not reference to a valid command binary path or is empty.\n"
 	fi
+
+	if [ "${REPO_DOWNLOAD_RATE}x" != "x" ] && ! [[ "${REPO_DOWNLOAD_RATE}" =~ ^[0-9]+[KMGTP]+$ ]] ; then
+		ERROR="${ERROR}ERROR: The defined download rate '${REPO_DOWNLOAD_RATE}' is not an integer value. It represents the download speed of RPM packages in megabytes.\n"
+    fi
 
 	for TMP in ${REPO_DOWNLOAD_INDEX_URIS} ; do
 		TMP_RETURN=`${CMD_CURL} -s -o /dev/null -w "%{response_code}" "${TMP}"`
@@ -166,6 +194,9 @@ processParameters() {
 		"--metadata" | "metadata" | "-m" | "m")
 			CMD_CREATEREPO="${TMP_VALUE}"
 			;;
+		"--limit-rate" | "limit-rate" | "-l" | "l")
+			REPO_DOWNLOAD_RATE="${TMP_VALUE}"
+			;;
 		"--url" | "url" | "-u" | "u")
 			REPO_DOWNLOAD_INDEX_URIS="${REPO_DOWNLOAD_INDEX_URIS} ${TMP_VALUE}"
 			;;
@@ -185,6 +216,7 @@ processParameters() {
 			${CMD_ECHO} -e "Optional arguments\n"
 			${CMD_ECHO} -e "\t-v, --verbosity\t: adjust level of verbosity (0 = no logging | 1 = systemctl and log file logging | 2 = systemctl, log file logging and terminal output)"
 			${CMD_ECHO} -e "\t-m, --metadata\t: set path to createrepo_c binary - if passed, the meta information will be generated"
+			${CMD_ECHO} -e "\t-l, --limit-rate\t: limit rate in curl download of rpm packages. Please refer to option '--limit-rate' in curl manual for details on allowed syntax"
 			${CMD_ECHO} -e "\t-h, --help\t: display help page"
 			${CMD_ECHO}
 			${CMD_ECHO} -e "Information\n"
@@ -200,6 +232,27 @@ processParameters() {
 		esac
 		TMP_COUNTER=$(( TMP_COUNTER + 1 ))
 	done
+}
+
+processDownload() {
+	OL_RETURN_RPM="${1}"
+	OL_REPO_DOWNLOAD_PATH="${2}"
+	OL_REPO_DOWNLOAD_FOLDER_NAMES="${3}"
+	OL_REPO_DOWNLOAD_BASE_URI="${4}"
+	OL_TMP_FILE_SHA256SUM="${5}"
+	OL_TMP_FILE_NAME="${6}"
+	cd "${OL_REPO_DOWNLOAD_PATH}${OL_REPO_DOWNLOAD_FOLDER_NAMES}"
+	if [ "${REPO_DOWNLOAD_RATE}x" != "x" ] ; then
+		${CMD_CURL} -s --limit-rate ${REPO_DOWNLOAD_RATE} -O "${OL_REPO_DOWNLOAD_BASE_URI}${OL_RETURN_RPM}"
+	else
+		${CMD_CURL} -s -O "${OL_REPO_DOWNLOAD_BASE_URI}${OL_RETURN_RPM}"
+	fi
+	if [ $? -eq 0 ] ;  then
+		processOutput "message" "INFO: The URI file '${OL_REPO_DOWNLOAD_BASE_URI}${OL_RETURN_RPM}' was downloaded to '${OL_REPO_DOWNLOAD_PATH}${OL_REPO_DOWNLOAD_FOLDER_NAMES}'."
+		${CMD_ECHO} "${OL_TMP_FILE_SHA256SUM}" > "${OL_REPO_DOWNLOAD_PATH}${OL_REPO_DOWNLOAD_FOLDER_NAMES}${OL_TMP_FILE_NAME}.uri.sha256"
+	else
+		processOutput "message" "WARNING: The URI file '${OL_REPO_DOWNLOAD_BASE_URI}${OL_RETURN_RPM}' could not be downloaded."
+	fi
 }
 
 processSync() {
@@ -236,21 +289,19 @@ processSync() {
 				TMP_FILE_SHA256SUM=`${CMD_CURL} -s -I "${REPO_DOWNLOAD_BASE_URI}${TMP_RETURN_RPM}" | ${CMD_GREP} "Last-Modified" | ${CMD_SHA256SUM}`
 				if [ -f "${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}${TMP_FILE_NAME}.uri.sha256" ] ; then
 					TMP_FILE_SHA256SUM_COMPARE=`${CMD_CAT} "${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}${TMP_FILE_NAME}.uri.sha256"`
-                fi
-                if [ "${TMP_FILE_SHA256SUM}" == "${TMP_FILE_SHA256SUM_COMPARE}" ] ; then
-                    processOutput "message" "WARNING: The file ${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}${TMP_FILE_NAME}.uri.sha256 has the same checksum as the URI source file. File download for ${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}${TMP_FILE_NAME} will be skipped."
-                    continue
 				fi
-
-				cd "${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}"
-				${CMD_CURL} -s -O "${REPO_DOWNLOAD_BASE_URI}${TMP_RETURN_RPM}"
-				if [ $? -eq 0 ] ;  then
-					processOutput "message" "INFO: The URI file '${REPO_DOWNLOAD_BASE_URI}${TMP_RETURN_RPM}' was downloaded to '${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}'."
-					${CMD_ECHO} "${TMP_FILE_SHA256SUM}" > "${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}${TMP_FILE_NAME}.uri.sha256"
-					${CMD_SLEEP} 0.01
-				else
-					processOutput "message" "WARNING: The URI file '${REPO_DOWNLOAD_BASE_URI}${TMP_RETURN_RPM}' could not be downloaded."
+				if [ "${TMP_FILE_SHA256SUM}" == "${TMP_FILE_SHA256SUM_COMPARE}" ] ; then
+					processOutput "message" "WARNING: The file ${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}${TMP_FILE_NAME}.uri.sha256 has the same checksum as the URI source file. File download for ${REPO_DOWNLOAD_PATH}${REPO_DOWNLOAD_FOLDER_NAMES}${TMP_FILE_NAME} will be skipped."
+					continue
 				fi
+				
+				TMP_CHILD_PIDS_COUNT=`${CMD_PSTREE} -p $$ | ${CMD_GREP} -oP '\(\K[^\)]+' | ${CMD_WC} -l`
+				while [ ${TMP_CHILD_PIDS_COUNT} -gt 20 ] ; do
+					sleep 0.5
+					TMP_CHILD_PIDS_COUNT=`${CMD_PSTREE} -p $$ | ${CMD_GREP} -oP '\(\K[^\)]+' | ${CMD_WC} -l`
+				done
+				processDownload "${TMP_RETURN_RPM}" "${REPO_DOWNLOAD_PATH}" "${REPO_DOWNLOAD_FOLDER_NAMES}" "${REPO_DOWNLOAD_BASE_URI}" "${TMP_FILE_SHA256SUM}" "${TMP_FILE_NAME}" &
+				${CMD_SLEEP} 0.01
 			done
 
 			if [ "${CMD_CREATEREPO}x" != "x" ] && [ -f "${CMD_CREATEREPO}" ] ; then
@@ -286,6 +337,13 @@ processConfigurationSave() {
 PARAMETERS="$*"
 PARAMETERS_COUNT=$(( $# + 1 ))
 
+trap processAbort SIGQUIT
+trap processAbort SIGINT
+trap processAbort SIGHUP
+trap processAbort SIGTERM
+trap processAbort EXIT
+
 processInitialization
 processSync
 processConfigurationSave
+${CMD_RMDIR} /tmp/.oracle-linux-sync.lck
